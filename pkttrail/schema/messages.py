@@ -1,8 +1,13 @@
 from marshmallow import Schema, fields
+from marshmallow.exceptions import ValidationError
 
 OS_AGENT_INIT_MESSAGE = 'pkttrail.agent.os.init'
 OS_AGENT_KEEPALIVE_MESSAGE = 'pkttrail.agent.os.keepalive'
 JSON_RPC_VERSION_2 = "2.0"
+
+class PktTrailSchemaValidationError(ValidationError):
+    pass
+
 
 class JSONRPCBaseSchema(Schema):
     jsonrpc = fields.Str(required=True, validate=lambda v: v == JSON_RPC_VERSION_2)
@@ -46,14 +51,26 @@ class PktTrailInitResponseSchema(JSONRPCResponseSchema):
             validate=lambda v: v == OS_AGENT_INIT_MESSAGE)
 
 
-class PktTrailKeepAliveRequest(JSONRPCRequestSchema):
+class PktTrailKeepAliveRequestParamsSchema(Schema):
+    agentUUID = fields.UUID()
+
+
+class PktTrailKeepAliveResponseResultsSchema(Schema):
+    status = fields.Str(required=True, validate=lambda v:v == "ok")
+
+
+class PktTrailKeepAliveRequestSchema(JSONRPCRequestSchema):
     """Keep Alive Request Message."""
-    pass
+    params = fields.Nested(PktTrailKeepAliveRequestParamsSchema)
+    method = fields.Str(required=True,
+            validate=lambda v: v == OS_AGENT_KEEPALIVE_MESSAGE)
 
 
-class PktTrailKeepAliveResponse(JSONRPCResponseSchema):
+class PktTrailKeepAliveResponseSchema(JSONRPCResponseSchema):
     """Keep Alive Response Message."""
-    pass
+    result = fields.Nested(PktTrailKeepAliveResponseResultsSchema)
+    method = fields.Str(required=True,
+            validate=lambda v: v == OS_AGENT_KEEPALIVE_MESSAGE)
 
 
 class PktTrailStatus(JSONRPCNotificationSchema):
@@ -75,3 +92,12 @@ if __name__ == '__main__':
     init_req = PktTrailInitRequestSchema().loads(init_req_json)
     print(init_req)
 
+    keepalive_req_json = """ {
+        "jsonrpc": "2.0",
+        "method": "pkttrail.agent.os.keepalive",
+        "id" : "1",
+        "params": {
+        }}"""
+
+    keepalive_req = PktTrailKeepAliveRequestSchema().loads(keepalive_req_json)
+    print(keepalive_req)
