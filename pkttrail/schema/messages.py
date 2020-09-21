@@ -1,20 +1,20 @@
 from marshmallow import Schema, fields
 
-_OS_AGENT_INIT_MESSAGE = 'pkttrail.agent.os.init'
-_OS_AGENT_KEEPALIVE_MESSAGE = 'pkttrail.agent.os.keepalive'
-_JSON_RPC_VERSION_2 = "2.0"
+OS_AGENT_INIT_MESSAGE = 'pkttrail.agent.os.init'
+OS_AGENT_KEEPALIVE_MESSAGE = 'pkttrail.agent.os.keepalive'
+JSON_RPC_VERSION_2 = "2.0"
 
 class JSONRPCBaseSchema(Schema):
-    jsonrpc = fields.Str(required=True, validate=lambda v: v == _JSON_RPC_VERSION_2)
+    jsonrpc = fields.Str(required=True, validate=lambda v: v == JSON_RPC_VERSION_2)
     method = fields.Str(required=True)
 
 class JSONRPCRequestSchema(JSONRPCBaseSchema):
     """JSON RPC Request Class for JSON RPC 2.0 ."""
-    id_ = fields.Str(required=True, data_key='id')
+    id = fields.Str(required=True)
 
 class JSONRPCResponseSchema(JSONRPCBaseSchema):
     """JSON RPC Response Class for JSON RPC 2.0 ."""
-    id_ = fields.Str(required=True, data_key='id')
+    id = fields.Str(required=True)
 
 class JSONRPCNotificationSchema(JSONRPCBaseSchema):
     pass
@@ -31,7 +31,7 @@ class PktTrailInitRequestSchema(JSONRPCRequestSchema):
     """Init Request Message."""
     params = fields.Nested(PktTrailInitRequestParamsSchema)
     method = fields.Str(required=True,
-            validate=lambda v: v == _OS_AGENT_INIT_MESSAGE)
+            validate=lambda v: v == OS_AGENT_INIT_MESSAGE)
 
 
 class PktTrailInitResponseResultsSchema(Schema):
@@ -43,7 +43,7 @@ class PktTrailInitResponseSchema(JSONRPCResponseSchema):
     """Init Response Message."""
     result = fields.Nested(PktTrailInitResponseResultsSchema)
     method = fields.Str(required=True,
-            validate=lambda v: v == _OS_AGENT_INIT_MESSAGE)
+            validate=lambda v: v == OS_AGENT_INIT_MESSAGE)
 
 
 class PktTrailKeepAliveRequest(JSONRPCRequestSchema):
