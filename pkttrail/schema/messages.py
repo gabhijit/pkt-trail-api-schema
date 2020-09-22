@@ -51,9 +51,16 @@ class PktTrailInitResponseSchema(JSONRPCResponseSchema):
             validate=lambda v: v == OS_AGENT_INIT_MESSAGE)
 
 
+class PktTrailServiceSchema(Schema):
+    """Schema for a 'service'."""
+    interface = fields.Str(required=True)
+    port = fields.Integer(required=True, validate=lambda v: v > 0 and v < 65536)
+    proto = fields.Str(require=True)
+    name = fields.Str()
+
 class PktTrailKeepAliveRequestParamsSchema(Schema):
     agentUUID = fields.UUID()
-
+    services = fields.Nested(PktTrailServiceSchema, many=True)
 
 class PktTrailKeepAliveResponseResultsSchema(Schema):
     status = fields.Str(required=True, validate=lambda v:v == "ok")
