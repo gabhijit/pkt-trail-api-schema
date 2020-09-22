@@ -30,7 +30,7 @@ class PktTrailInitRequestParamsSchema(Schema):
 
     schemaVersion = fields.Str(required=True, validate=lambda v: v == "1.0")
     agentSWVersion = fields.Str(required=True)
-    agentUUID = fields.UUID()
+    agentUUID = fields.UUID(required=True)
 
 class PktTrailInitRequestSchema(JSONRPCRequestSchema):
     """Init Request Message."""
@@ -59,7 +59,7 @@ class PktTrailServiceSchema(Schema):
     name = fields.Str()
 
 class PktTrailKeepAliveRequestParamsSchema(Schema):
-    agentUUID = fields.UUID()
+    agentUUID = fields.UUID(required=True)
     services = fields.Nested(PktTrailServiceSchema, many=True)
 
 class PktTrailKeepAliveResponseResultsSchema(Schema):
@@ -87,24 +87,32 @@ class PktTrailStatus(JSONRPCNotificationSchema):
 
 if __name__ == '__main__':
 
-    init_req_json = """ {
+    import uuid
+
+    agent_uuid = str(uuid.uuid1())
+
+    init_req_json = """ {{
         "jsonrpc": "2.0",
         "method": "pkttrail.agent.os.init",
         "id" : "1",
-        "params": {
+        "params": {{
+            "agentUUID": "{}",
             "schemaVersion" : "1.0",
             "agentSWVersion" : "0.0.1"
-        }}"""
+        }}
+    }}""".format(agent_uuid)
 
     init_req = PktTrailInitRequestSchema().loads(init_req_json)
     print(init_req)
 
-    keepalive_req_json = """ {
+    keepalive_req_json = """ {{
         "jsonrpc": "2.0",
         "method": "pkttrail.agent.os.keepalive",
         "id" : "1",
-        "params": {
-        }}"""
+        "params": {{
+            "agentUUID": "{}"
+        }}
+    }}""".format(agent_uuid)
 
     keepalive_req = PktTrailKeepAliveRequestSchema().loads(keepalive_req_json)
     print(keepalive_req)
