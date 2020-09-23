@@ -11,11 +11,11 @@ class PktTrailSchemaValidationError(ValidationError):
 
 class JSONRPCBaseSchema(Schema):
     jsonrpc = fields.Str(required=True, validate=lambda v: v == JSON_RPC_VERSION_2)
-    method = fields.Str(required=True)
 
 class JSONRPCRequestSchema(JSONRPCBaseSchema):
     """JSON RPC Request Class for JSON RPC 2.0 ."""
     id = fields.Str(required=True)
+    method = fields.Str(required=True)
 
 class JSONRPCResponseSchema(JSONRPCBaseSchema):
     """JSON RPC Response Class for JSON RPC 2.0 ."""
@@ -47,8 +47,6 @@ class PktTrailInitResponseResultsSchema(Schema):
 class PktTrailInitResponseSchema(JSONRPCResponseSchema):
     """Init Response Message."""
     result = fields.Nested(PktTrailInitResponseResultsSchema)
-    method = fields.Str(required=True,
-            validate=lambda v: v == OS_AGENT_INIT_MESSAGE)
 
 
 class PktTrailServiceSchema(Schema):
@@ -76,8 +74,6 @@ class PktTrailKeepAliveRequestSchema(JSONRPCRequestSchema):
 class PktTrailKeepAliveResponseSchema(JSONRPCResponseSchema):
     """Keep Alive Response Message."""
     result = fields.Nested(PktTrailKeepAliveResponseResultsSchema)
-    method = fields.Str(required=True,
-            validate=lambda v: v == OS_AGENT_KEEPALIVE_MESSAGE)
 
 
 class PktTrailStatus(JSONRPCNotificationSchema):
@@ -85,6 +81,16 @@ class PktTrailStatus(JSONRPCNotificationSchema):
     pass
 
 
+method_to_schema_class = {
+
+        OS_AGENT_INIT_MESSAGE: dict(
+            request=PktTrailInitRequestSchema,
+            response=PktTrailInitResponseSchema),
+
+        OS_AGENT_KEEPALIVE_MESSAGE: dict(
+            request=PktTrailKeepAliveRequestSchema,
+            response=PktTrailKeepAliveResponseSchema),
+    }
 if __name__ == '__main__':
 
     import uuid
